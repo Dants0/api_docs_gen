@@ -1,7 +1,5 @@
 // backend/index.ts
 import Fastify from "fastify";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
 import cors from "@fastify/cors";
 import fastifyOauth2 from "@fastify/oauth2";
 import fetch from "node-fetch";
@@ -24,19 +22,6 @@ fastify.register(fastifyCookie, {
   secret: "uma_chave_super_secreta", // para assinar cookies se quiser
 });
 
-fastify.register(fastifySwagger, {
-  swagger: {
-    info: {
-      title: "API Doc Generator",
-      description: "Auto-generated API documentation",
-      version: "0.1.0",
-    },
-    host: "localhost:3001",
-    schemes: ["http"],
-    consumes: ["application/json"],
-    produces: ["application/json"],
-  },
-});
 
 fastify.register(fastifyOauth2, {
   name: "githubOAuth2",
@@ -52,14 +37,6 @@ fastify.register(fastifyOauth2, {
   callbackUri: "http://localhost:3001/auth/github/callback",
 });
 
-
-fastify.register(fastifySwaggerUi, {
-  routePrefix: "/docs",
-  uiConfig: {
-    docExpansion: "full",
-    deepLinking: false,
-  },
-});
 
 
 fastify.get("/health", async () => {
@@ -94,28 +71,163 @@ fastify.get("/auth/github/callback", async function (req, reply) {
   }
 });
 
+fastify.get("/auth/github/logout", async (req, reply) => {
+  reply.clearCookie("gh_token", { path: "/" });
+  return reply.redirect("http://localhost:3000");
+})
+
+
 
 
 // listar repositórios do usuário
 fastify.get("/github/repos", async (req, reply) => {
   const accessToken = req.cookies.gh_token;
-  console.log("Access Token:", accessToken);
 
   if (!accessToken) {
     return reply.status(401).send({ error: "Unauthorized" });
   }
 
-  const ghRes = await fetch("https://api.github.com/user/repos", {
-    headers: {
-      Authorization: `token ${accessToken}`,
-      "User-Agent": "fastify-api-doc-gen",
-    },
-  });
+  try {
+    let page = 1;
+    const per_page = 100; // máximo permitido pelo GitHub
+    let allRepos: any[] = [];
 
-  const repos = await ghRes.json();
-  return repos;
+    while (true) {
+      const res = await fetch(`https://api.github.com/user/repos?per_page=${per_page}&page=${page}`, {
+        headers: {
+          Authorization: `token ${accessToken}`,
+          "User-Agent": "fastify-api-doc-gen",
+        },
+      });
+
+      if (!res.ok) {
+        return reply.status(res.status).send({ error: "Failed to fetch repositories" });
+      }
+
+      const repos: any = await res.json();
+      allRepos = allRepos.concat(repos);
+
+      // se a página atual retornou menos do que per_page, acabou
+      if (repos.length < per_page) break;
+
+      page++;
+    }
+
+    return allRepos;
+  } catch (err) {
+    console.error("GitHub repos fetch error:", err);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
 });
 
+
+// pegar informações do usuário logado
+fastify.get("/github/user", async (req, reply) => {
+  const accessToken = req.cookies.gh_token;
+
+  if (!accessToken) {
+    return reply.status(401).send({ error: "Unauthorized", statusCode: 401 });
+  }
+
+  try {
+    const res = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        "User-Agent": "fastify-api-doc-gen",
+      },
+    });
+
+    if (!res.ok) {
+      return reply.status(res.status).send({ error: "Failed to fetch user info" });
+    }
+
+    const user = await res.json();
+    return user;
+  } catch (err) {
+    console.error("GitHub user fetch error:", err);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
+});
+
+
+fastify.post("/generate", async (req, reply) => {
+  const accessToken = req.cookies.gh_token;
+
+  if (!accessToken) {
+    return reply.status(401).send({ error: "Unauthorized" });
+  }
+
+  const { repoId }: any = req.body;
+  if (!repoId) {
+    return reply.status(400).send({ error: "Repo ID is required" });
+  }
+
+  try {
+    // 1️⃣ Buscar dados do repositório selecionado
+    const repoRes = await fetch(`https://api.github.com/repositories/${repoId}`, {
+      headers: {
+        Authorization: `token ${accessToken}`,
+        "User-Agent": "fastify-api-doc-gen",
+      },
+    });
+
+    if (!repoRes.ok) {
+      return reply.status(repoRes.status).send({ error: "Failed to fetch repository info" });
+    }
+
+    const repoData:any = await repoRes.json();
+
+    // 2️⃣ Montar prompt para OpenAI
+    const prompt = `
+      Gere um README completo para este repositório GitHub:
+      Nome: ${repoData.name}
+      Descrição: ${repoData.description || "Sem descrição"}
+      Linguagem principal: ${repoData.language || "Não especificada"}
+      Visibilidade: ${repoData.private ? "Privado" : "Público"}
+
+      Estrutura do README:
+      - Título
+      - Descrição
+      - Instalação
+      - Uso
+      - Exemplos de API (se houver)
+      - Licença
+      - Contato
+
+      Gere o conteúdo em Markdown pronto para usar.
+    `;
+
+    // 3️⃣ Chamar OpenAI
+    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4", // ou gpt-3.5-turbo
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1000,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!openaiRes.ok) {
+      const err = await openaiRes.text();
+      return reply.status(openaiRes.status).send({ error: "OpenAI request failed", details: err });
+    }
+
+    const openaiData:any = await openaiRes.json();
+    const readmeContent = openaiData.choices[0].message.content;
+
+    // 4️⃣ Retornar conteúdo gerado para o frontend
+    return reply.send({ readme: readmeContent });
+
+  } catch (err) {
+    console.error("Generate README error:", err);
+    return reply.status(500).send({ error: "Internal Server Error" });
+  }
+});
 
 const start = async () => {
   try {
