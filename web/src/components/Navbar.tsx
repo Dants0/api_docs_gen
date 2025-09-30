@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText } from "lucide-react";
+import { FileText, LogOut } from "lucide-react";
 import Link from "next/link";
 
 export default function Navbar() {
@@ -50,9 +50,9 @@ export default function Navbar() {
                 onClick={() => {
                   window.location.href = "http://localhost:3001/auth/github/logout";
                 }}
-                className="text-sm text-red-600 hover:underline"
+                className="text-sm text-red-600 hover:underline border p-2 bg-red-100 rounded"
               >
-                Sair
+                <LogOut className="w-5 h-5 inline-block" />
               </button>
             </div>
           ) : (
