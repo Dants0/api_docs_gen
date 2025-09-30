@@ -219,6 +219,7 @@ fastify.post("/generate", async (req, reply) => {
 
     const openaiData:any = await openaiRes.json();
     const readmeContent = openaiData.choices[0].message.content;
+    console.log("Generated README:", readmeContent);
 
     // 4️⃣ Retornar conteúdo gerado para o frontend
     return reply.send({ readme: readmeContent });
