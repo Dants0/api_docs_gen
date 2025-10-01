@@ -50,7 +50,7 @@ export default function Navbar() {
                 onClick={() => {
                   window.location.href = "http://localhost:3001/auth/github/logout";
                 }}
-                className="text-sm text-red-600 hover:underline border p-2 bg-red-100 rounded"
+                className="text-sm text-red-600 hover:underline border p-2 bg-red-100 rounded cursor-pointer hover:bg-red-200 transition-colors"
               >
                 <LogOut className="w-5 h-5 inline-block" />
               </button>
