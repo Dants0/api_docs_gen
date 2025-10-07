@@ -50,9 +50,10 @@ export const Hero = () => {
               },
               {
                 icon: FileText,
-                title: "Docs Profissionais",
-                desc: "Gera Swagger/OpenAPI completo",
-                color: "from-purple-600 to-purple-800"
+                title: "Colabore com o Projeto",
+                desc: "Contribua no GitHub e ajude a melhorar a documentação gerada ou relate problemas.",
+                color: "from-purple-600 to-purple-800",
+                a: "https://github.com/Dants0/api_docs_gen"
               }
             ].map((feature, i) => (
               <div key={i} className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
@@ -61,6 +62,16 @@ export const Hero = () => {
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
                 <p className="text-gray-600">{feature.desc}</p>
+                {feature.a && (<div className="mt-4">
+                  <a
+                    href={feature.a}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Saiba mais
+                  </a>
+                </div>)}
               </div>
             ))}
           </div>
