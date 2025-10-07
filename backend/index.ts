@@ -59,10 +59,10 @@ fastify.get("/auth/github/callback", async function (req, reply) {
     reply.setCookie("gh_token", access_token, {
       httpOnly: true,
       secure: true, // obrigatório em HTTPS
-      path: "/",
-      sameSite: "lax",
+      // path: "/",
+      // sameSite: "lax",
     });
-    
+
     // Redireciona para o frontend
     return reply.redirect("https://api-docs-gen.vercel.app/repo");
   } catch (err) {
