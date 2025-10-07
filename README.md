@@ -11,7 +11,7 @@ Para instalar e usar este projeto, você precisa ter Node.js e npm instalados em
 1. Clone este repositório para sua máquina local usando:
 
    ```
-   git clone https://github.com/username/api_docs_gen.git
+   git clone https://github.com/dants0/api_docs_gen.git
    ```
    
 2. Navegue até o diretório do projeto:
