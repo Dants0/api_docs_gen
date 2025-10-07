@@ -57,10 +57,10 @@ fastify.get("/auth/github/callback", async function (req, reply) {
 
     // // Salva o token em cookie HttpOnly
     reply.setCookie("gh_token", access_token, {
-      // httpOnly: true,
-      // secure: false,
+      httpOnly: true,
+      secure: true, // obrigatório em HTTPS
       path: "/",
-      // sameSite: "lax",
+      sameSite: "lax",
     });
 
     reply.send({
@@ -76,6 +76,8 @@ fastify.get("/auth/github/callback", async function (req, reply) {
     return reply.status(500).send({ error: "OAuth callback failed" });
   }
 });
+
+
 
 fastify.get("/auth/github/logout", async (req, reply) => {
   reply.clearCookie("gh_token", { path: "/" });
