@@ -58,9 +58,9 @@ fastify.get("/auth/github/callback", async function (req, reply) {
     // // Salva o token em cookie HttpOnly
     reply.setCookie("gh_token", access_token, {
       // httpOnly: true,
-      secure: false,
+      // secure: false,
       path: "/",
-      sameSite: "lax",
+      // sameSite: "lax",
     });
 
     // Redireciona para o frontend
