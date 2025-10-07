@@ -175,7 +175,7 @@ fastify.post("/generate", async (req, reply) => {
       return reply.status(repoRes.status).send({ error: "Failed to fetch repository info" });
     }
 
-    const repoData:any = await repoRes.json();
+    const repoData: any = await repoRes.json();
 
     // 2️⃣ Montar prompt para OpenAI
     const prompt = `
@@ -217,7 +217,7 @@ fastify.post("/generate", async (req, reply) => {
       return reply.status(openaiRes.status).send({ error: "OpenAI request failed", details: err });
     }
 
-    const openaiData:any = await openaiRes.json();
+    const openaiData: any = await openaiRes.json();
     const readmeContent = openaiData.choices[0].message.content;
     console.log("Generated README:", readmeContent);
 
@@ -232,7 +232,7 @@ fastify.post("/generate", async (req, reply) => {
 
 const start = async () => {
   try {
-    await fastify.listen({ port: 3001 });
+    await fastify.listen({ port: 3001, host: '0.0.0.0' });
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
