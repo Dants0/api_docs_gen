@@ -22,7 +22,7 @@ export const RepoList = () => {
 
   // Carrega todos os repositórios do backend
   useEffect(() => {
-    fetch("http://localhost:3001/github/repos", {
+    fetch("https://api-docs-gen.onrender.com/github/repos", {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -88,7 +88,7 @@ export const RepoList = () => {
     setSelected(repo.id);
 
     try {
-      const res = await fetch("http://localhost:3001/generate", {
+      const res = await fetch("https://api-docs-gen.onrender.com/generate", {
         method: "POST",
         credentials: "include",
         headers: {

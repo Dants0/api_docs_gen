@@ -12,7 +12,7 @@ dotenv.config();
 const fastify = Fastify({ logger: true });
 
 fastify.register(cors, {
-  origin: "http://localhost:3000",
+  origin: "https://api-docs-gen.vercel.app/",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
@@ -34,7 +34,7 @@ fastify.register(fastifyOauth2, {
   },
   scope: ["repo", "user"],
   startRedirectPath: "/auth/github/login",
-  callbackUri: "http://localhost:3001/auth/github/callback",
+  callbackUri: "https://api-docs-gen.onrender.com/auth/github/callback",
 });
 
 
@@ -64,7 +64,7 @@ fastify.get("/auth/github/callback", async function (req, reply) {
     });
 
     // Redireciona para o frontend
-    return reply.redirect("http://localhost:3000/repo");
+    return reply.redirect("https://api-docs-gen.vercel.app/repo");
   } catch (err) {
     console.error("GitHub OAuth error:", err);
     return reply.status(500).send({ error: "OAuth callback failed" });
@@ -73,7 +73,7 @@ fastify.get("/auth/github/callback", async function (req, reply) {
 
 fastify.get("/auth/github/logout", async (req, reply) => {
   reply.clearCookie("gh_token", { path: "/" });
-  return reply.redirect("http://localhost:3000");
+  return reply.redirect("https://api-docs-gen.vercel.app/");
 })
 
 

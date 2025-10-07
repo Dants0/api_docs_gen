@@ -9,7 +9,7 @@ export default function Navbar() {
 
   useEffect(() => {
     // busca usuário logado do backend
-    fetch("http://localhost:3001/github/user", {
+    fetch("https://api-docs-gen.onrender.com/github/user", {
       credentials: "include", // envia cookie automaticamente
     })
       .then((res) => {
@@ -48,7 +48,7 @@ export default function Navbar() {
               <span className="text-sm font-medium text-gray-700">{user.name || user.login}</span>
               <button
                 onClick={() => {
-                  window.location.href = "http://localhost:3001/auth/github/logout";
+                  window.location.href = "https://api-docs-gen.onrender.com/auth/github/logout";
                 }}
                 className="text-sm text-red-600 hover:underline border p-2 bg-red-100 rounded cursor-pointer hover:bg-red-200 transition-colors"
               >
@@ -57,7 +57,7 @@ export default function Navbar() {
             </div>
           ) : (
             <Link
-              href="http://localhost:3001/auth/github/login"
+              href="https://api-docs-gen.onrender.com/auth/github/login"
               className="text-sm text-blue-600 hover:underline"
             >
               Login com GitHub

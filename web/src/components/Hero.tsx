@@ -2,7 +2,7 @@ import { Zap, Github, ArrowRight, Code, FileText } from "lucide-react";
 
 export const Hero = () => {
   const handleLogin = () => {
-    window.location.href = "http://localhost:3001/auth/github/login";
+    window.location.href = "https://api-docs-gen.onrender.com/auth/github/login";
   };
 
   return (
