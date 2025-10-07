@@ -55,9 +55,9 @@ fastify.get("/auth/github/callback", async function (req, reply) {
       return reply.status(400).send({ error: "Failed to get access token" });
     }
 
-    // Salva o token em cookie HttpOnly
+    // // Salva o token em cookie HttpOnly
     reply.setCookie("gh_token", access_token, {
-      httpOnly: true,
+      // httpOnly: true,
       secure: false,
       path: "/",
       sameSite: "lax",
