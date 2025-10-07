@@ -62,13 +62,7 @@ fastify.get("/auth/github/callback", async function (req, reply) {
       path: "/",
       sameSite: "lax",
     });
-
-    reply.send({
-      code: 200,
-      message: "Authentication successful",
-      access_token: access_token,
-    })
-
+    
     // Redireciona para o frontend
     return reply.redirect("https://api-docs-gen.vercel.app/repo");
   } catch (err) {
